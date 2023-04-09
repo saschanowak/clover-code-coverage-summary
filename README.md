@@ -1,105 +1,168 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# Code Coverage Summary
 
-# Create a JavaScript Action using TypeScript
+A GitHub Action that reads Clover format code coverage files from your test
+suite and outputs a markdown summary. This summary can be posted as a Pull
+Request comment or included in Release Notes by other actions to give you an
+immediate insight into the health of your code without using a third-party site.
+Code Coverage Summary is designed for use with any test framework that outputs
+coverage in Clover XML format.
+The action has a build in feature to group coverage by package. This currently
+works with composer.json only.
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+## Inputs
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+### `filename`
+**Required**
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+A path to the code coverage file to analyse. Also supports using glob patterns to match multiple files. If there are any spaces in a path or filename this value must be in quotes.
 
-## Create an action from this template
 
-Click the `Use this Template` and provide the new repo details for your action
+## Outputs
 
-## Code in Main
 
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
+### Markdown Example
 
-Install the dependencies  
-```bash
-$ npm install
-```
+<table>
+      <tr>
+        <th colspan="8">Code Coverage
+      <tr>
+        <th colspan="1">Package
+        <th colspan="2">Lines
+        <th colspan="2">Functions
+        <th colspan="2">Classes
+        <th colspan="1">Health
+      <tr>
+  <td>unknown
+  <td align="center">96%
+  <td align="right">26/27
+  <td align="center">83%
+  <td align="right">5/6
+  <td align="center">93%
+  <td align="right">31/33
+  <td align="center">✅
+      <tr>
+  <td><strong>Summary
+  <td align="center"><strong>96%
+  <td align="right"><strong>26/27
+  <td align="center"><strong>83%
+  <td align="right"><strong>5/6
+  <td align="center"><strong>93%
+  <td align="right"><strong>31/33
+  <td align="center"><strong>✅
+      </table>
+<details>
+          <summary>Code Coverage details</summary>
+          <table>
+            <tr>
+              <th colspan="8">Code Coverage
+            <tr>
+              <th colspan="1">Class
+              <th colspan="2">Lines
+              <th colspan="2">Functions
+              <th colspan="2">Classes
+              <th colspan="1">Health
+            <tr>
+              <td colspan="8"><strong>unknown
+              <tr>
+  <td>Netlogix\Nxdummy\Exception\OptionNotFoundException
+  <td align="center">NaN%
+  <td align="right">0/0
+  <td align="center">NaN%
+  <td align="right">0/0
+  <td align="center">NaN%
+  <td align="right">0/0
+  <td align="center">❌
+<tr>
+  <td>Netlogix\Nxdummy\Options\MiddlewareOptions
+  <td align="center">90%
+  <td align="right">10/11
+  <td align="center">66%
+  <td align="right">2/3
+  <td align="center">85%
+  <td align="right">12/14
+  <td align="center">✅
+<tr>
+  <td>Netlogix\Nxdummy\Utility\UriUtility
+  <td align="center">100%
+  <td align="right">16/16
+  <td align="center">100%
+  <td align="right">3/3
+  <td align="center">100%
+  <td align="right">19/19
+  <td align="center">🚀
+            <tr>
+  <td><strong>Summary
+  <td align="center"><strong>96%
+  <td align="right"><strong>26/27
+  <td align="center"><strong>83%
+  <td align="right"><strong>5/6
+  <td align="center"><strong>93%
+  <td align="right"><strong>31/33
+  <td align="center"><strong>✅
+          </table>
+        </details>
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
-```
-
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
-
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
-
-...
-```
-
-## Change action.yml
-
-The action.yml defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
+## Usage
 
 ```yaml
-uses: ./
+name: Code Coverage Summary Report
+uses: saschanowak/CloverCodeCoverageSummary@v0.1.0
 with:
-  milliseconds: 1000
+  filename: clover.xml
 ```
 
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
+Add the following to your workflow to include the summary in the job summary:
+```yaml
+name: 'Add Code Coverage to Job Summary'
+run: cat code-coverage-results-merged.md >> $GITHUB_STEP_SUMMARY
+```
 
-## Usage:
+Add the following to your workflow to post the summary as a Pull Request comment:
+```yaml
+name: 'Add Code Coverage as PR Comment'
+uses: marocchino/sticky-pull-request-comment@v2
+if: github.event_name == 'pull_request'
+with:
+  recreate: true
+  path: code-coverage-results-merged.md
+```
 
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+## Version Numbers
+
+Version numbers will be assigned according to the [Semantic Versioning](https://semver.org/) scheme.
+This means, given a version number MAJOR.MINOR.PATCH, we will increment the:
+
+1. MAJOR version when we make incompatible API changes
+2. MINOR version when we add functionality in a backwards compatible manner
+3. PATCH version when we make backwards compatible bug fixes
+
+
+## Contributing
+
+### Report Bugs
+
+Please make sure the bug is not already reported by searching existing [issues].
+
+If you're unable to find an existing issue addressing the problem please [open a new one][new-issue]. Be sure to include a title and clear description, as much relevant information as possible, a workflow sample and any logs demonstrating the problem.
+
+
+### Suggest an Enhancement
+
+Please [open a new issue][new-issue].
+
+
+### Submit a Pull Request
+
+Discuss your idea first, so that your changes have a good chance of being merged in.
+
+Submit your pull request against the `main` branch.
+
+Pull requests that include documentation and relevant updates to README.md are merged faster, because you won't have to wait for somebody else to complete your contribution.
+
+
+## License
+
+Code Coverage Summary is available under the MIT license, see the [LICENSE](LICENSE) file for more info.
+
+[issues]: https://github.com/irongut/CodeCoverageSummary/issues
+[new-issue]: https://github.com/irongut/CodeCoverageSummary/issues/new

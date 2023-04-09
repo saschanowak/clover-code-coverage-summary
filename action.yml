@@ -1,11 +1,13 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Clover Code Coverage Summary'
+author: 'Sascha Nowak'
+description: 'A GitHub Action to generate a code coverage summary from Clover XML reports.'
+branding:
+  icon: trending-up
+  color: black
 inputs:
-  milliseconds: # change this
+  filename:
+    description: 'Path and filename of the cobertura coverage report'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
 runs:
   using: 'node16'
   main: 'dist/index.js'
