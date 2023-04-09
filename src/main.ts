@@ -1,19 +1,327 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import {getInput, error, setFailed} from '@actions/core'
+import {XMLParser} from 'fast-xml-parser'
+import {existsSync, readFileSync} from 'fs'
+import {readFile, writeFile} from 'fs/promises'
+import {glob} from 'glob'
+import path from 'path'
 
-async function run(): Promise<void> {
+interface Metric {
+  loc: number
+  ncloc: number
+  methods: number
+  coveredmethods: number
+  conditionals: number
+  coveredconditionals: number
+  statements: number
+  coveredstatements: number
+  elements: number
+  coveredelements: number
+}
+
+interface ClassMetric extends Metric {
+  name: string
+  complexity: number
+}
+
+interface PackageMetric extends Metric {
+  classes: number
+}
+
+interface SummaryMetric extends Metric {
+  files: number
+  classes: number
+}
+
+interface Package {
+  name: string
+  metrics: PackageMetric
+  classes: {[key: string]: ClassMetric}
+}
+
+interface Packages {
+  [key: string]: Package
+}
+
+const packageNamePathMap = new Map<string, string>()
+
+export async function guessPackageNameByFilePath(
+  file: string
+): Promise<string> {
+  const parts = file.split('/')
+
+  let packageName = 'unknown'
+
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    parts.reduce((filePath, part) => {
+      if (packageNamePathMap.has(filePath)) {
+        packageName = packageNamePathMap.get(filePath) || packageName
+      }
+      return `${filePath}/${part}`.replace(/\/\//g, '/')
+    }, '')
+  } catch (e) {
+    if (e instanceof Error) error(e)
   }
+
+  if (packageName !== 'unknown') {
+    return packageName
+  }
+
+  do {
+    parts.pop()
+    const filePath = parts.join('/')
+    if (existsSync(`${filePath}/composer.json`)) {
+      try {
+        const foo = path.resolve(filePath, 'composer.json')
+        const json = readFileSync(foo, 'utf8')
+        packageName = JSON.parse(json)['name']
+        break
+      } catch (e) {
+        if (e instanceof Error) error(e)
+      }
+    }
+  } while (parts.length > 0)
+
+  packageNamePathMap.set(parts.join('/'), packageName)
+
+  return packageName
+}
+
+export function getMetricRow(
+  name: string,
+  metrics: Metric,
+  bold = false
+): string {
+  const percentage = parseInt(
+    ((metrics.coveredelements / metrics.elements) * 100).toString(),
+    10
+  )
+  return `<tr>
+  <td>${bold ? '<strong>' : ''}${name}
+  <td align="center">${bold ? '<strong>' : ''}${parseInt(
+    ((metrics.coveredstatements / metrics.statements) * 100).toString(),
+    10
+  )}%
+  <td align="right">${bold ? '<strong>' : ''}${metrics.coveredstatements}/${
+    metrics.statements
+  }
+  <td align="center">${bold ? '<strong>' : ''}${parseInt(
+    ((metrics.coveredmethods / metrics.methods) * 100).toString(),
+    10
+  )}%
+  <td align="right">${bold ? '<strong>' : ''}${metrics.coveredmethods}/${
+    metrics.methods
+  }
+  <td align="center">${bold ? '<strong>' : ''}${parseInt(
+    ((metrics.coveredelements / metrics.elements) * 100).toString(),
+    10
+  )}%
+  <td align="right">${bold ? '<strong>' : ''}${metrics.coveredelements}/${
+    metrics.elements
+  }
+  <td align="center">${bold ? '<strong>' : ''}${
+    percentage === 100
+      ? '🚀'
+      : percentage > 80
+      ? '✅'
+      : percentage > 50
+      ? '➖'
+      : '❌'
+  }`
+}
+
+export async function run(): Promise<string> {
+  const results: string[] = ['']
+
+  try {
+    const files = await glob(getInput('filename'), {ignore: 'node_modules/**'})
+
+    for (const filePath of files) {
+      const xmlData = await readFile(path.resolve(filePath), 'utf8')
+
+      const options = {
+        ignoreAttributes: false
+      }
+
+      const parser = new XMLParser(options)
+      const reportData = parser.parse(xmlData)
+
+      const packages: Packages = {}
+      for (const file of reportData.coverage.project.file) {
+        const packageName = await guessPackageNameByFilePath(file['@_name'])
+
+        if (packageName === undefined) {
+          continue
+        }
+
+        if (!packages.hasOwnProperty(packageName)) {
+          packages[packageName] = {
+            name: packageName,
+            classes: {},
+            metrics: {
+              classes: 0,
+              loc: 0,
+              ncloc: 0,
+              methods: 0,
+              coveredmethods: 0,
+              conditionals: 0,
+              coveredconditionals: 0,
+              statements: 0,
+              coveredstatements: 0,
+              elements: 0,
+              coveredelements: 0
+            }
+          }
+        }
+
+        packages[packageName].metrics.classes += 1
+        packages[packageName].metrics.loc += parseInt(file.metrics['@_loc'], 10)
+        packages[packageName].metrics.ncloc += parseInt(
+          file.metrics['@_ncloc'],
+          10
+        )
+        packages[packageName].metrics.methods += parseInt(
+          file.metrics['@_methods'],
+          10
+        )
+        packages[packageName].metrics.coveredmethods += parseInt(
+          file.metrics['@_coveredmethods'],
+          10
+        )
+        packages[packageName].metrics.conditionals += parseInt(
+          file.metrics['@_conditionals'],
+          10
+        )
+        packages[packageName].metrics.coveredconditionals += parseInt(
+          file.metrics['@_coveredconditionals'],
+          10
+        )
+        packages[packageName].metrics.statements += parseInt(
+          file.metrics['@_statements'],
+          10
+        )
+        packages[packageName].metrics.coveredstatements += parseInt(
+          file.metrics['@_coveredstatements'],
+          10
+        )
+        packages[packageName].metrics.elements += parseInt(
+          file.metrics['@_elements'],
+          10
+        )
+        packages[packageName].metrics.coveredelements += parseInt(
+          file.metrics['@_coveredelements'],
+          10
+        )
+
+        if (!file.hasOwnProperty('class')) {
+          continue
+        }
+
+        packages[packageName].classes[file.class['@_name']] = {
+          name: file.class['@_name'],
+          complexity: parseInt(file.class.metrics['@_complexity'], 10),
+          loc: parseInt(file.class.metrics['@_loc'], 10),
+          ncloc: parseInt(file.class.metrics['@_ncloc'], 10),
+          methods: parseInt(file.class.metrics['@_methods'], 10),
+          coveredmethods: parseInt(file.class.metrics['@_coveredmethods'], 10),
+          conditionals: parseInt(file.class.metrics['@_conditionals'], 10),
+          coveredconditionals: parseInt(
+            file.class.metrics['@_coveredconditionals'],
+            10
+          ),
+          statements: parseInt(file.class.metrics['@_statements'], 10),
+          coveredstatements: parseInt(
+            file.class.metrics['@_coveredstatements'],
+            10
+          ),
+          elements: parseInt(file.class.metrics['@_elements'], 10),
+          coveredelements: parseInt(file.class.metrics['@_coveredelements'], 10)
+        }
+      }
+
+      const summary: SummaryMetric = {
+        files: parseInt(reportData.coverage.project.metrics['@_files'], 10),
+        loc: parseInt(reportData.coverage.project.metrics['@_loc'], 10),
+        ncloc: parseInt(reportData.coverage.project.metrics['@_ncloc'], 10),
+        classes: parseInt(reportData.coverage.project.metrics['@_classes'], 10),
+        methods: parseInt(reportData.coverage.project.metrics['@_methods'], 10),
+        coveredmethods: parseInt(
+          reportData.coverage.project.metrics['@_coveredmethods'],
+          10
+        ),
+        conditionals: parseInt(
+          reportData.coverage.project.metrics['@_conditionals'],
+          10
+        ),
+        coveredconditionals: parseInt(
+          reportData.coverage.project.metrics['@_coveredconditionals'],
+          10
+        ),
+        statements: parseInt(
+          reportData.coverage.project.metrics['@_statements'],
+          10
+        ),
+        coveredstatements: parseInt(
+          reportData.coverage.project.metrics['@_coveredstatements'],
+          10
+        ),
+        elements: parseInt(
+          reportData.coverage.project.metrics['@_elements'],
+          10
+        ),
+        coveredelements: parseInt(
+          reportData.coverage.project.metrics['@_coveredelements'],
+          10
+        )
+      }
+
+      results.push(`<table>
+      <tr>
+        <th colspan="8">Code Coverage
+      <tr>
+        <th colspan="1">Package
+        <th colspan="2">Lines
+        <th colspan="2">Functions
+        <th colspan="2">Classes
+        <th colspan="1">Health
+      ${Object.values(packages)
+        .map(_package => getMetricRow(_package.name, _package.metrics))
+        .join('\n')}
+      ${getMetricRow('Summary', summary, true)}
+      </table>`)
+
+      results.push(`<details>
+          <summary>Code Coverage details</summary>
+          <table>
+            <tr>
+              <th colspan="8">Code Coverage
+            <tr>
+              <th colspan="1">Class
+              <th colspan="2">Lines
+              <th colspan="2">Functions
+              <th colspan="2">Classes
+              <th colspan="1">Health
+            ${Object.values(packages)
+              .map(
+                _package => `<tr>
+              <td colspan="8"><strong>${_package.name}
+              ${Object.values(_package.classes)
+                .map(_class => getMetricRow(_class.name, _class))
+                .join('\n')}`
+              )
+              .join('\n')}
+            ${getMetricRow('Summary', summary, true)}
+          </table>
+        </details>`)
+    }
+
+    results.push('')
+    results.push('')
+  } catch (e) {
+    if (e instanceof Error) setFailed(e.message)
+  }
+
+  await writeFile(path.resolve('code-coverage-results.md'), results.join('\n'))
+  return results.join('\n')
 }
 
 run()
