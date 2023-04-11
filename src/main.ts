@@ -16,6 +16,8 @@ interface Metric {
   coveredstatements: number
   elements: number
   coveredelements: number
+  classes: number
+  coveredclasses: number
 }
 
 interface ClassMetric extends Metric {
@@ -24,12 +26,11 @@ interface ClassMetric extends Metric {
 }
 
 interface PackageMetric extends Metric {
-  classes: number
+  name: string
 }
 
 interface SummaryMetric extends Metric {
   files: number
-  classes: number
 }
 
 interface Package {
@@ -92,31 +93,29 @@ export function getMetricRow(
   bold = false
 ): string {
   const percentage = parseInt(
-    ((metrics.coveredelements / metrics.elements) * 100).toString(),
+    ((metrics.coveredmethods / metrics.methods) * 100).toString(),
     10
   )
   return `<tr>
   <td>${bold ? '<strong>' : ''}${name}
-  <td align="center">${bold ? '<strong>' : ''}${parseInt(
-    ((metrics.coveredstatements / metrics.statements) * 100).toString(),
-    10
-  )}%
+  <td align="center">${bold ? '<strong>' : ''}${(
+    (metrics.coveredstatements / metrics.statements || 0) * 100
+  ).toFixed(2)}%
   <td align="right">${bold ? '<strong>' : ''}${metrics.coveredstatements}/${
     metrics.statements
   }
-  <td align="center">${bold ? '<strong>' : ''}${parseInt(
-    ((metrics.coveredmethods / metrics.methods) * 100).toString(),
-    10
-  )}%
+  <td align="center">${bold ? '<strong>' : ''}${(
+    (metrics.coveredmethods / metrics.methods || 0) * 100
+  ).toFixed(2)}%
   <td align="right">${bold ? '<strong>' : ''}${metrics.coveredmethods}/${
     metrics.methods
   }
-  <td align="center">${bold ? '<strong>' : ''}${parseInt(
-    ((metrics.coveredelements / metrics.elements) * 100).toString(),
-    10
-  )}%
-  <td align="right">${bold ? '<strong>' : ''}${metrics.coveredelements}/${
-    metrics.elements
+  <td align="center">${bold ? '<strong>' : ''}${(
+    (metrics.coveredclasses / metrics.classes) *
+    100
+  ).toFixed(2)}%
+  <td align="right">${bold ? '<strong>' : ''}${metrics.coveredclasses}/${
+    metrics.classes
   }
   <td align="center">${bold ? '<strong>' : ''}${
     percentage === 100
@@ -158,7 +157,9 @@ export async function run(): Promise<string> {
             name: packageName,
             classes: {},
             metrics: {
+              name: packageName,
               classes: 0,
+              coveredclasses: 0,
               loc: 0,
               ncloc: 0,
               methods: 0,
@@ -173,7 +174,10 @@ export async function run(): Promise<string> {
           }
         }
 
-        packages[packageName].metrics.classes += 1
+        packages[packageName].metrics.classes += parseInt(
+          file.metrics['@_classes'],
+          10
+        )
         packages[packageName].metrics.loc += parseInt(file.metrics['@_loc'], 10)
         packages[packageName].metrics.ncloc += parseInt(
           file.metrics['@_ncloc'],
@@ -215,9 +219,22 @@ export async function run(): Promise<string> {
         if (!file.hasOwnProperty('class')) {
           continue
         }
+        const statements = parseInt(file.class.metrics['@_statements'], 10)
+        const coveredstatements = parseInt(
+          file.class.metrics['@_coveredstatements'],
+          10
+        )
+
+        const covered =
+          parseInt(((coveredstatements / statements) * 100).toString(), 10) ===
+          100
+            ? 1
+            : 0
 
         packages[packageName].classes[file.class['@_name']] = {
           name: file.class['@_name'],
+          classes: 1,
+          coveredclasses: covered,
           complexity: parseInt(file.class.metrics['@_complexity'], 10),
           loc: parseInt(file.class.metrics['@_loc'], 10),
           ncloc: parseInt(file.class.metrics['@_ncloc'], 10),
@@ -236,6 +253,7 @@ export async function run(): Promise<string> {
           elements: parseInt(file.class.metrics['@_elements'], 10),
           coveredelements: parseInt(file.class.metrics['@_coveredelements'], 10)
         }
+        packages[packageName].metrics.coveredclasses += covered
       }
 
       const summary: SummaryMetric = {
@@ -243,6 +261,10 @@ export async function run(): Promise<string> {
         loc: parseInt(reportData.coverage.project.metrics['@_loc'], 10),
         ncloc: parseInt(reportData.coverage.project.metrics['@_ncloc'], 10),
         classes: parseInt(reportData.coverage.project.metrics['@_classes'], 10),
+        coveredclasses: Object.values(packages).reduce(
+          (covered, _package) => covered + _package.metrics.coveredclasses,
+          0
+        ),
         methods: parseInt(reportData.coverage.project.metrics['@_methods'], 10),
         coveredmethods: parseInt(
           reportData.coverage.project.metrics['@_coveredmethods'],
