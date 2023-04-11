@@ -32,7 +32,7 @@ A path to the code coverage file to analyse. Also supports using glob patterns t
         <th colspan="2">Classes
         <th colspan="1">Health
       <tr>
-  <td>unknown
+  <td>nxdummy
   <td align="center">96%
   <td align="right">26/27
   <td align="center">83%
@@ -62,7 +62,7 @@ A path to the code coverage file to analyse. Also supports using glob patterns t
               <th colspan="2">Classes
               <th colspan="1">Health
             <tr>
-              <td colspan="8"><strong>unknown
+              <td colspan="8"><strong>nxdummy
               <tr>
   <td>Netlogix\Nxdummy\Exception\OptionNotFoundException
   <td align="center">NaN%
