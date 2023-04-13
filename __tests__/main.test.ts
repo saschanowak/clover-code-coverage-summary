@@ -141,8 +141,12 @@ test('Row metric with bold style', () => {
 test('Markdown generation', async () => {
   process.env['INPUT_FILENAME'] = './__tests__/data/clover.xml'
   const generated = await run()
-  const expected = (
-    await readFile(path.resolve('./__tests__/data/code-coverage-results.md'))
+  const summary = (
+    await readFile(path.resolve('./__tests__/data/code-coverage-summary.md'))
   ).toString()
-  expect(expected).toBe(generated)
+  const details = (
+    await readFile(path.resolve('./__tests__/data/code-coverage-details.md'))
+  ).toString()
+  expect(summary).toBe(generated.summary)
+  expect(details).toBe(generated.details)
 })

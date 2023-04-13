@@ -20,7 +20,7 @@ A path to the code coverage file to analyse. Also supports using glob patterns t
 ## Outputs
 
 
-### Markdown Example
+### Markdown Example Summary
 
 <table>
       <tr>
@@ -50,6 +50,9 @@ A path to the code coverage file to analyse. Also supports using glob patterns t
   <td align="right"><strong>31/33
   <td align="center"><strong>✅
       </table>
+
+### Markdown Example Details
+
 <details>
           <summary>Code Coverage details</summary>
           <table>
@@ -114,17 +117,19 @@ with:
 Add the following to your workflow to include the summary in the job summary:
 ```yaml
 name: 'Add Code Coverage to Job Summary'
-run: cat code-coverage-results-merged.md >> $GITHUB_STEP_SUMMARY
+run: |
+  cat code-coverage-summary.md >> $GITHUB_STEP_SUMMARY
+  cat code-coverage-details.md >> $GITHUB_STEP_SUMMARY
 ```
 
 Add the following to your workflow to post the summary as a Pull Request comment:
 ```yaml
-name: 'Add Code Coverage as PR Comment'
+name: 'Add Code Coverage Summary as PR Comment'
 uses: marocchino/sticky-pull-request-comment@v2
 if: github.event_name == 'pull_request'
 with:
   recreate: true
-  path: code-coverage-results-merged.md
+  path: code-coverage-summary.md
 ```
 
 ## Version Numbers

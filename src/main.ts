@@ -128,8 +128,9 @@ export function getMetricRow(
   }`
 }
 
-export async function run(): Promise<string> {
-  const results: string[] = ['']
+export async function run(): Promise<{summary: string; details: string}> {
+  const summary: string[] = ['']
+  const details: string[] = ['']
 
   try {
     const files = await glob(getInput('filename'), {ignore: 'node_modules/**'})
@@ -256,7 +257,7 @@ export async function run(): Promise<string> {
         packages[packageName].metrics.coveredclasses += covered
       }
 
-      const summary: SummaryMetric = {
+      const summaryMetric: SummaryMetric = {
         files: parseInt(reportData.coverage.project.metrics['@_files'], 10),
         loc: parseInt(reportData.coverage.project.metrics['@_loc'], 10),
         ncloc: parseInt(reportData.coverage.project.metrics['@_ncloc'], 10),
@@ -296,7 +297,7 @@ export async function run(): Promise<string> {
         )
       }
 
-      results.push(`<table>
+      summary.push(`<table>
       <tr>
         <th colspan="8">Code Coverage
       <tr>
@@ -308,10 +309,12 @@ export async function run(): Promise<string> {
       ${Object.values(packages)
         .map(_package => getMetricRow(_package.name, _package.metrics))
         .join('\n')}
-      ${getMetricRow('Summary', summary, true)}
+      ${getMetricRow('Summary', summaryMetric, true)}
       </table>`)
+      summary.push('')
+      summary.push('')
 
-      results.push(`<details>
+      details.push(`<details>
           <summary>Code Coverage details</summary>
           <table>
             <tr>
@@ -331,19 +334,25 @@ export async function run(): Promise<string> {
                 .join('\n')}`
               )
               .join('\n')}
-            ${getMetricRow('Summary', summary, true)}
+            ${getMetricRow('Summary', summaryMetric, true)}
           </table>
         </details>`)
+      details.push('')
+      details.push('')
     }
-
-    results.push('')
-    results.push('')
   } catch (e) {
     if (e instanceof Error) setFailed(e.message)
   }
 
-  await writeFile(path.resolve('code-coverage-results.md'), results.join('\n'))
-  return results.join('\n')
+  await writeFile(path.resolve('code-coverage-results.md'), summary.join('\n'))
+  await writeFile(
+    path.resolve('code-coverage-results-details.md'),
+    details.join('\n')
+  )
+  return {
+    summary: summary.join('\n'),
+    details: details.join('\n')
+  }
 }
 
 run()

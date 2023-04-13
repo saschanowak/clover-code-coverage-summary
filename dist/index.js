@@ -89,7 +89,8 @@ function getMetricRow(name, metrics, bold = false) {
 exports.getMetricRow = getMetricRow;
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const results = [''];
+        const summary = [''];
+        const details = [''];
         try {
             const files = yield (0, glob_1.glob)((0, core_1.getInput)('filename'), { ignore: 'node_modules/**' });
             for (const filePath of files) {
@@ -164,7 +165,7 @@ function run() {
                     };
                     packages[packageName].metrics.coveredclasses += covered;
                 }
-                const summary = {
+                const summaryMetric = {
                     files: parseInt(reportData.coverage.project.metrics['@_files'], 10),
                     loc: parseInt(reportData.coverage.project.metrics['@_loc'], 10),
                     ncloc: parseInt(reportData.coverage.project.metrics['@_ncloc'], 10),
@@ -179,7 +180,7 @@ function run() {
                     elements: parseInt(reportData.coverage.project.metrics['@_elements'], 10),
                     coveredelements: parseInt(reportData.coverage.project.metrics['@_coveredelements'], 10)
                 };
-                results.push(`<table>
+                summary.push(`<table>
       <tr>
         <th colspan="8">Code Coverage
       <tr>
@@ -191,9 +192,11 @@ function run() {
       ${Object.values(packages)
                     .map(_package => getMetricRow(_package.name, _package.metrics))
                     .join('\n')}
-      ${getMetricRow('Summary', summary, true)}
+      ${getMetricRow('Summary', summaryMetric, true)}
       </table>`);
-                results.push(`<details>
+                summary.push('');
+                summary.push('');
+                details.push(`<details>
           <summary>Code Coverage details</summary>
           <table>
             <tr>
@@ -211,19 +214,23 @@ function run() {
                     .map(_class => getMetricRow(_class.name, _class))
                     .join('\n')}`)
                     .join('\n')}
-            ${getMetricRow('Summary', summary, true)}
+            ${getMetricRow('Summary', summaryMetric, true)}
           </table>
         </details>`);
+                details.push('');
+                details.push('');
             }
-            results.push('');
-            results.push('');
         }
         catch (e) {
             if (e instanceof Error)
                 (0, core_1.setFailed)(e.message);
         }
-        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-results.md'), results.join('\n'));
-        return results.join('\n');
+        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-results.md'), summary.join('\n'));
+        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-results-details.md'), details.join('\n'));
+        return {
+            summary: summary.join('\n'),
+            details: details.join('\n')
+        };
     });
 }
 exports.run = run;
