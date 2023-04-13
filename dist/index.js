@@ -225,8 +225,8 @@ function run() {
             if (e instanceof Error)
                 (0, core_1.setFailed)(e.message);
         }
-        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-results.md'), summary.join('\n'));
-        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-results-details.md'), details.join('\n'));
+        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-summary.md'), summary.join('\n'));
+        yield (0, promises_1.writeFile)(path_1.default.resolve('code-coverage-details.md'), details.join('\n'));
         return {
             summary: summary.join('\n'),
             details: details.join('\n')

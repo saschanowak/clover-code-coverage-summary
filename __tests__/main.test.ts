@@ -2,6 +2,7 @@ import {expect, test} from '@jest/globals'
 import {readFile} from 'fs/promises'
 import path from 'path'
 import {getMetricRow, run} from '../src/main'
+import {existsSync} from 'fs'
 
 test('Row metric with 100.00%', () => {
   const metrics = {
@@ -149,4 +150,6 @@ test('Markdown generation', async () => {
   ).toString()
   expect(summary).toBe(generated.summary)
   expect(details).toBe(generated.details)
+  expect(existsSync(path.resolve('./code-coverage-summary.md'))).toBeTruthy()
+  expect(existsSync(path.resolve('./code-coverage-details.md'))).toBeTruthy()
 })

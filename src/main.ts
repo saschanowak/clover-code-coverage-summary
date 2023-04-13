@@ -344,11 +344,8 @@ export async function run(): Promise<{summary: string; details: string}> {
     if (e instanceof Error) setFailed(e.message)
   }
 
-  await writeFile(path.resolve('code-coverage-results.md'), summary.join('\n'))
-  await writeFile(
-    path.resolve('code-coverage-results-details.md'),
-    details.join('\n')
-  )
+  await writeFile(path.resolve('code-coverage-summary.md'), summary.join('\n'))
+  await writeFile(path.resolve('code-coverage-details.md'), details.join('\n'))
   return {
     summary: summary.join('\n'),
     details: details.join('\n')
