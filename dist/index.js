@@ -88,6 +88,7 @@ function getMetricRow(name, metrics, bold = false) {
 }
 exports.getMetricRow = getMetricRow;
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const summary = [''];
         const details = [''];
@@ -100,8 +101,10 @@ function run() {
                 };
                 const parser = new fast_xml_parser_1.XMLParser(options);
                 const reportData = parser.parse(xmlData);
+                const coverageFile = ((_a = reportData.coverage.project) === null || _a === void 0 ? void 0 : _a.file) ||
+                    reportData.coverage.project.package.file;
                 const packages = {};
-                for (const file of reportData.coverage.project.file) {
+                for (const file of coverageFile) {
                     const packageName = yield guessPackageNameByFilePath(file['@_name']);
                     if (packageName === undefined) {
                         continue;

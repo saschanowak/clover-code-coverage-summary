@@ -144,9 +144,12 @@ export async function run(): Promise<{summary: string; details: string}> {
 
       const parser = new XMLParser(options)
       const reportData = parser.parse(xmlData)
+      const coverageFile =
+        reportData.coverage.project?.file ||
+        reportData.coverage.project.package.file
 
       const packages: Packages = {}
-      for (const file of reportData.coverage.project.file) {
+      for (const file of coverageFile) {
         const packageName = await guessPackageNameByFilePath(file['@_name'])
 
         if (packageName === undefined) {
