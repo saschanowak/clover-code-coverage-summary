@@ -121,10 +121,10 @@ export function getMetricRow(
     percentage === 100
       ? '🚀'
       : percentage > 80
-      ? '✅'
-      : percentage > 50
-      ? '➖'
-      : '❌'
+        ? '✅'
+        : percentage > 50
+          ? '➖'
+          : '❌'
   }`
 }
 
