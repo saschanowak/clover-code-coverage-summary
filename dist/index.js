@@ -159,29 +159,31 @@ function run() {
                     if (!file.hasOwnProperty('class')) {
                         continue;
                     }
-                    const statements = parseInt(file.class.metrics['@_statements'], 10);
-                    const coveredstatements = parseInt(file.class.metrics['@_coveredstatements'], 10);
-                    const covered = parseInt(((coveredstatements / statements) * 100).toString(), 10) ===
-                        100
-                        ? 1
-                        : 0;
-                    packages[packageName].classes[file.class['@_name']] = {
-                        name: file.class['@_name'],
-                        classes: 1,
-                        coveredclasses: covered,
-                        complexity: parseInt(file.class.metrics['@_complexity'], 10),
-                        loc: parseInt(file.class.metrics['@_loc'], 10),
-                        ncloc: parseInt(file.class.metrics['@_ncloc'], 10),
-                        methods: parseInt(file.class.metrics['@_methods'], 10),
-                        coveredmethods: parseInt(file.class.metrics['@_coveredmethods'], 10),
-                        conditionals: parseInt(file.class.metrics['@_conditionals'], 10),
-                        coveredconditionals: parseInt(file.class.metrics['@_coveredconditionals'], 10),
-                        statements: parseInt(file.class.metrics['@_statements'], 10),
-                        coveredstatements: parseInt(file.class.metrics['@_coveredstatements'], 10),
-                        elements: parseInt(file.class.metrics['@_elements'], 10),
-                        coveredelements: parseInt(file.class.metrics['@_coveredelements'], 10)
-                    };
-                    packages[packageName].metrics.coveredclasses += covered;
+                    const classes = !Array.isArray(file.class) ? [file.class] : file.class;
+                    for (const item of classes) {
+                        const statements = parseInt(item.metrics['@_statements'], 10);
+                        const coveredstatements = parseInt(item.metrics['@_coveredstatements'], 10);
+                        const covered = parseInt(((coveredstatements / statements) * 100).toString(), 10) === 100
+                            ? 1
+                            : 0;
+                        packages[packageName].classes[item['@_name']] = {
+                            name: item['@_name'],
+                            classes: 1,
+                            coveredclasses: covered,
+                            complexity: parseInt(item.metrics['@_complexity'], 10),
+                            loc: parseInt(item.metrics['@_loc'], 10),
+                            ncloc: parseInt(item.metrics['@_ncloc'], 10),
+                            methods: parseInt(item.metrics['@_methods'], 10),
+                            coveredmethods: parseInt(item.metrics['@_coveredmethods'], 10),
+                            conditionals: parseInt(item.metrics['@_conditionals'], 10),
+                            coveredconditionals: parseInt(item.metrics['@_coveredconditionals'], 10),
+                            statements: parseInt(item.metrics['@_statements'], 10),
+                            coveredstatements: parseInt(item.metrics['@_coveredstatements'], 10),
+                            elements: parseInt(item.metrics['@_elements'], 10),
+                            coveredelements: parseInt(item.metrics['@_coveredelements'], 10)
+                        };
+                        packages[packageName].metrics.coveredclasses += covered;
+                    }
                 }
                 const summaryMetric = {
                     files: parseInt(reportData.coverage.project.metrics['@_files'], 10),

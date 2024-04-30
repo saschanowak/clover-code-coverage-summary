@@ -31,6 +31,15 @@
   <td align="right">0/1
   <td align="center">➖
 <tr>
+  <td>Netlogix\Nxdummy\Options\MiddlewareOptions2
+  <td align="center">90.91%
+  <td align="right">10/11
+  <td align="center">66.67%
+  <td align="right">2/3
+  <td align="center">0.00%
+  <td align="right">0/1
+  <td align="center">➖
+<tr>
   <td>Netlogix\Nxdummy\Utility\UriUtility
   <td align="center">100.00%
   <td align="right">16/16

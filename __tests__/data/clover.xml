@@ -11,6 +11,9 @@
       <class name="Netlogix\Nxdummy\Options\MiddlewareOptions" namespace="global">
         <metrics complexity="5" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="10" elements="14" coveredelements="12"/>
       </class>
+      <class name="Netlogix\Nxdummy\Options\MiddlewareOptions2" namespace="global">
+        <metrics complexity="5" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="10" elements="14" coveredelements="12"/>
+      </class>
       <metrics loc="47" ncloc="47" classes="1" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="10" elements="14" coveredelements="12"/>
     </file>
     <file name="__tests__/data/nxdummy/Classes/Utility/UriUtility.php">
