@@ -80,6 +80,16 @@ export async function guessPackageNameByFilePath(
         if (e instanceof Error) error(e)
       }
     }
+    if (existsSync(`${filePath}/package.json`)) {
+      try {
+        const foo = path.resolve(filePath, 'package.json')
+        const json = readFileSync(foo, 'utf8')
+        packageName = JSON.parse(json)['name']
+        break
+      } catch (e) {
+        if (e instanceof Error) error(e)
+      }
+    }
   } while (parts.length > 0)
 
   packageNamePathMap.set(parts.join('/'), packageName)
