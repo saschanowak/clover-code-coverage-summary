@@ -6,7 +6,7 @@ branding:
   color: black
 inputs:
   filename:
-    description: 'Path and filename of the cobertura coverage report'
+    description: 'Path and filename of the clover coverage report'
     required: true
 runs:
   using: 'node20'
