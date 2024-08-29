@@ -108,28 +108,28 @@ A path to the code coverage file to analyse. Also supports using glob patterns t
 ## Usage
 
 ```yaml
-name: Code Coverage Summary Report
-uses: saschanowak/CloverCodeCoverageSummary@v1.0.0
-with:
-  filename: clover.xml
+      - name: Code Coverage Summary Report
+        uses: saschanowak/CloverCodeCoverageSummary@1.0.1
+        with:
+          filename: clover.xml
 ```
 
 Add the following to your workflow to include the summary in the job summary:
 ```yaml
-name: 'Add Code Coverage to Job Summary'
-run: |
-  cat code-coverage-summary.md >> $GITHUB_STEP_SUMMARY
-  cat code-coverage-details.md >> $GITHUB_STEP_SUMMARY
+      - name: 'Add Code Coverage to Job Summary'
+        run: |
+          cat code-coverage-summary.md >> $GITHUB_STEP_SUMMARY
+          cat code-coverage-details.md >> $GITHUB_STEP_SUMMARY
 ```
 
 Add the following to your workflow to post the summary as a Pull Request comment:
 ```yaml
-name: 'Add Code Coverage Summary as PR Comment'
-uses: marocchino/sticky-pull-request-comment@v2
-if: github.event_name == 'pull_request'
-with:
-  recreate: true
-  path: code-coverage-summary.md
+      - name: 'Add Code Coverage Summary as PR Comment'
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: code-coverage-summary.md
 ```
 
 ## Version Numbers
