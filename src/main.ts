@@ -43,6 +43,47 @@ interface Packages {
   [key: string]: Package
 }
 
+interface CoveragePackage {
+  '@_name': string
+  file: CoverageFile | CoverageFile[]
+}
+
+interface ClassFile {
+  '@_name': string
+  metrics: {
+    '@_complexity': string
+    '@_loc': string
+    '@_ncloc': string
+    '@_methods': string
+    '@_coveredmethods': string
+    '@_conditionals': string
+    '@_coveredconditionals': string
+    '@_statements': string
+    '@_coveredstatements': string
+    '@_elements': string
+    '@_coveredelements': string
+  }
+}
+
+interface CoverageFile {
+  '@_name': string
+  metrics: {
+    '@_classes': string
+    '@_complexity': string
+    '@_loc': string
+    '@_ncloc': string
+    '@_methods': string
+    '@_coveredmethods': string
+    '@_conditionals': string
+    '@_coveredconditionals': string
+    '@_statements': string
+    '@_coveredstatements': string
+    '@_elements': string
+    '@_coveredelements': string
+  }
+  class?: ClassFile | ClassFile[]
+}
+
 const packageNamePathMap = new Map<string, string>()
 
 export async function guessPackageNameByFilePath(
@@ -156,7 +197,16 @@ export async function run(): Promise<{summary: string; details: string}> {
       const reportData = parser.parse(xmlData)
       let coverageFiles =
         reportData.coverage.project?.file ||
-        reportData.coverage.project.package.file
+        reportData.coverage.project.package?.file ||
+        reportData.coverage.project.package?.reduce(
+          (_coverageFiles: CoverageFile[], packageData: CoveragePackage) => [
+            ..._coverageFiles,
+            ...(Array.isArray(packageData.file)
+              ? packageData.file
+              : [packageData.file])
+          ],
+          []
+        )
 
       if (!Array.isArray(coverageFiles)) {
         coverageFiles = [coverageFiles]

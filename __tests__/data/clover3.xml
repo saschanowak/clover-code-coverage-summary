@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1681063500">
+  <project timestamp="1681063500">
+    <package name="Netlogix\Nxdummy\Exception\OptionNotFoundException">
+      <file name="__tests__/data/nxdummy/Classes/Exception/OptionNotFoundException.php">
+        <class name="Netlogix\Nxdummy\Exception\OptionNotFoundException" namespace="global">
+          <metrics complexity="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+        </class>
+        <metrics loc="13" ncloc="13" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+      </file>
+    </package>
+    <package name="Netlogix\Nxdummy\Options\MiddlewareOptions">
+      <file name="__tests__/data/nxdummy/Classes/Options/MiddlewareOptions.php">
+        <class name="Netlogix\Nxdummy\Options\MiddlewareOptions" namespace="global">
+          <metrics complexity="5" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="10" elements="14" coveredelements="12"/>
+        </class>
+        <class name="Netlogix\Nxdummy\Options\MiddlewareOptions2" namespace="global">
+          <metrics complexity="5" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="10" elements="14" coveredelements="12"/>
+        </class>
+        <metrics loc="47" ncloc="47" classes="1" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="11" coveredstatements="10" elements="14" coveredelements="12"/>
+      </file>
+    </package>
+    <package name="Netlogix\Nxdummy\Utility\UriUtility">
+      <file name="__tests__/data/nxdummy/Classes/Utility/UriUtility.php">
+        <class name="Netlogix\Nxdummy\Utility\UriUtility" namespace="global">
+          <metrics complexity="3" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="16" coveredstatements="16" elements="19" coveredelements="19"/>
+        </class>
+        <metrics loc="50" ncloc="50" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="16" coveredstatements="16" elements="19" coveredelements="19"/>
+      </file>
+    </package>
+    <metrics files="3" loc="110" ncloc="110" classes="2" methods="6" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="27" coveredstatements="26" elements="33" coveredelements="31"/>
+  </project>
+</coverage>

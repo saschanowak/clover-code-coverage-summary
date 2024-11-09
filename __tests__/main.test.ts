@@ -139,8 +139,38 @@ test('Row metric with bold style', () => {
   <td align="center"><strong>🚀`)
 })
 
-test('Markdown generation', async () => {
-  process.env['INPUT_FILENAME'] = './__tests__/data/clover.xml'
+test('Markdown generation 1', async () => {
+  process.env['INPUT_FILENAME'] = './__tests__/data/clover1.xml'
+  const generated = await run()
+  const summary = (
+    await readFile(path.resolve('./__tests__/data/code-coverage-summary.md'))
+  ).toString()
+  const details = (
+    await readFile(path.resolve('./__tests__/data/code-coverage-details.md'))
+  ).toString()
+  expect(summary).toBe(generated.summary)
+  expect(details).toBe(generated.details)
+  expect(existsSync(path.resolve('./code-coverage-summary.md'))).toBeTruthy()
+  expect(existsSync(path.resolve('./code-coverage-details.md'))).toBeTruthy()
+})
+
+test('Markdown generation 2', async () => {
+  process.env['INPUT_FILENAME'] = './__tests__/data/clover2.xml'
+  const generated = await run()
+  const summary = (
+    await readFile(path.resolve('./__tests__/data/code-coverage-summary.md'))
+  ).toString()
+  const details = (
+    await readFile(path.resolve('./__tests__/data/code-coverage-details.md'))
+  ).toString()
+  expect(summary).toBe(generated.summary)
+  expect(details).toBe(generated.details)
+  expect(existsSync(path.resolve('./code-coverage-summary.md'))).toBeTruthy()
+  expect(existsSync(path.resolve('./code-coverage-details.md'))).toBeTruthy()
+})
+
+test('Markdown generation 3', async () => {
+  process.env['INPUT_FILENAME'] = './__tests__/data/clover3.xml'
   const generated = await run()
   const summary = (
     await readFile(path.resolve('./__tests__/data/code-coverage-summary.md'))
